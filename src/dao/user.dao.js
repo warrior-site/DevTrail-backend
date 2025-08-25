@@ -9,3 +9,9 @@ export const createUser = async (userData)=>{
     const user = await new User(userData);
     return await user.save();
 }
+export const updateUser = async (userId, updateData)=>{
+    return await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true });
+}
+export const findUserById = async (userId) => {
+    return await User.findById(userId).select("-password");
+}

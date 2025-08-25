@@ -1,7 +1,22 @@
-import { createUser, findUserByEmail } from "../dao/user.dao.js";
+import { createUser, findUserByEmail, findUserById } from "../dao/user.dao.js";
 import bcrypt from "bcrypt"
 import { setCookie } from "../service/setCookies.js";
 
+
+
+export const checkAuth = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const userDetail = await findUserById(user.id)
+    return res.status(200).json({ message: "Authorized", user: userDetail });
+  } catch (error) {
+    console.error("Check auth error:", error);
+    return res.status(500).json({ message: "Something went wrong. Please try again." });
+  }
+};
 
 export const register = async (req, res) => {
   try {
@@ -65,10 +80,11 @@ export const login = async (req, res) => {
 
     // Set cookie/token
     setCookie(res, user);
+    user.password = undefined;
 
     return res.status(200).json({
       message: "Login successful",
-      user: { id: user._id, username: user.username, email: user.email },
+      user: user,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -125,10 +141,16 @@ export const githubLoginClerk = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.clearCookie('token');
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", 
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      path: "/", // IMPORTANT: must match setCookies
+    });
+
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     console.error("Logout error:", error);
-    return res.status(500).json({ message: "Something went wrong. Please try again." });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
