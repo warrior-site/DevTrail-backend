@@ -10,7 +10,7 @@ import userRoute from "./routes/user.route.js"
 import githubSyncRoute from "./routes/githunSync.route.js"
 import resumeRoute from "./routes/resume.route.js"
 const app = express()
-
+app.set("trust proxy", 1);
 app.use(cors({
   origin: ["http://localhost:5173","https://dev-trail-frontend.vercel.app"],
   credentials: true
