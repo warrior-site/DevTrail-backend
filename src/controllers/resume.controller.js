@@ -155,7 +155,6 @@ Generate a professional resume JSON based on this schema:
   }
 };
 
-
 export const updateResume = async (req, res) => {
   try {
     const { userId } = req.body; // assuming userId comes from req.body (or from auth middleware)

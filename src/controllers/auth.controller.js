@@ -8,13 +8,13 @@ export const checkAuth = async (req, res) => {
   try {
     const user = req.user;
     if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({success:false , message: "Unauthorized" });
     }
     const userDetail = await findUserById(user.id)
-    return res.status(200).json({ message: "Authorized", user: userDetail });
+    return res.status(200).json({success:true , message: "Authorized", user: userDetail });
   } catch (error) {
     console.error("Check auth error:", error);
-    return res.status(500).json({ message: "Something went wrong. Please try again." });
+    return res.status(500).json({success:false , message: "Something went wrong. Please try again." });
   }
 };
 
@@ -31,7 +31,7 @@ export const register = async (req, res) => {
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
+      return res.status(400).json({success:false , message: "Invalid email format" });
     }
 
     // Run DB lookup & hashing in parallel
@@ -41,7 +41,7 @@ export const register = async (req, res) => {
     ]);
 
     if (alreadyUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({success:false , message: "User already exists" });
     }
 
     // Create user
@@ -51,12 +51,13 @@ export const register = async (req, res) => {
     setCookie(res, user);
 
     return res.status(201).json({
+      success:true ,
       message: "User created successfully",
       user: { id: user._id, username: user.username, email: user.email },
     });
   } catch (error) {
     console.error("Register error:", error);
-    return res.status(500).json({ message: "Something went wrong. Please try again." });
+    return res.status(500).json({success:false , message: "Something went wrong. Please try again." });
   }
 };
 
@@ -64,18 +65,18 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({success:false , message: "All fields are required" });
   }
 
   try {
     const user = await findUserByEmail(email);
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({success:false , message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({success:false , message: "Invalid email or password" });
     }
 
     // Set cookie/token
@@ -83,12 +84,13 @@ export const login = async (req, res) => {
     user.password = undefined;
 
     return res.status(200).json({
+      success:true ,
       message: "Login successful",
       user: user,
     });
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ message: "Something went wrong. Please try again." });
+    return res.status(500).json({success:false , message: "Something went wrong. Please try again." });
   }
 };
 
@@ -148,9 +150,9 @@ export const logout = async (req, res) => {
       path: "/", // IMPORTANT: must match setCookies
     });
 
-    return res.status(200).json({ message: "Logged out successfully" });
+    return res.status(200).json({success:true , message: "Logged out successfully" });
   } catch (error) {
     console.error("Logout error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({success:false , message: "Internal server error" });
   }
 };

@@ -56,6 +56,7 @@ export const createJournal = async (req, res) => {
 
     res.status(201).json({
       success: true,
+      message:"Journal created successfully",
       data: journal,
     });
   } catch (error) {
@@ -67,7 +68,6 @@ export const createJournal = async (req, res) => {
     });
   }
 };
-
 
 export const updateJournal = async (req, res) => {
     const { journalId, userId, title, content, tags, visibility } = req.body;
@@ -83,7 +83,7 @@ export const updateJournal = async (req, res) => {
             ...(visibility && { visibility })
         }
         const journal = await updateJournalDocument(journalId, data);
-        res.status(200).json({ message: "journal updated", journal })
+        res.status(200).json({success:true , message: "journal updated", journal })
     } catch (error) {
         console.log("error while updating journal", error)
         res.status(500).json({
@@ -149,7 +149,7 @@ export const starTheJournal = async (req,res) =>{
            });
        }
        const journal = await starJournalDocument(journalId);
-       res.status(200).json({ message: "journal starred", journal })
+       res.status(200).json({success:true , message: "journal starred", journal })
    } catch (error) {
        console.log("error while starring journal", error)
        res.status(500).json({
