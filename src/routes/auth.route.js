@@ -6,8 +6,8 @@ const router = express.Router();
 
 router.get("/check-auth",checkAuthMiddle,checkAuth)
 router.post("/register",authLimiter,register)
-router.post("/login",authLimiter,login)
+router.post("/login",login)
 router.post("/login/github",authLimiter,githubLoginClerk)
-router.post("/logout",authLimiter,logout);
+router.post("/logout",logout);
 
 export default router;

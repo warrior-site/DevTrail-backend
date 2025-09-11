@@ -117,3 +117,53 @@ export const updateGithubRepoController = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+export const syncGithubReposController = async (req, res) => {
+  const { githubUsername, userId } = req.body;
+
+  try {
+    if (!githubUsername) {
+      return res.status(400).json({ message: "GitHub username is required" });
+    }
+
+    // ✅ Always fetch from GitHub
+    const repos = await fetchGithubRepoFromGithub(githubUsername);
+
+    if (!repos || repos.length === 0) {
+      return res.status(404).json({ message: "No GitHub repositories found" });
+    }
+
+    // ✅ Format repositories
+    const formatRepo = repos.map(repo => ({
+      id: repo.id,
+      name: repo.name,
+      url: repo.html_url,
+      description: repo.description || "",
+      language: repo.language || "Unknown",
+      stars: repo.stargazers_count || 0,
+      forks: repo.forks_count || 0,
+      updatedAt: repo.updated_at ? new Date(repo.updated_at) : null
+    }));
+
+    // ✅ Replace old repos in DB with new ones
+    const githubRepo = await createGithubRepoDocument(userId, formatRepo);
+
+    if (!githubRepo) {
+      return res.status(500).json({ message: "Failed to update GitHub repository document" });
+    }
+
+    // ✅ Update repoCount in User schema
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $set: { repoCount: formatRepo.length } }
+    );
+
+    return res.status(200).json({
+      message: "GitHub repositories synced successfully with latest data",
+      githubRepos: githubRepo,
+    });
+
+  } catch (error) {
+    console.error("Error syncing GitHub repositories:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

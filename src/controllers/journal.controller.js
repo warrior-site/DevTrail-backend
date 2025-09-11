@@ -4,7 +4,7 @@ import { createJournalDocument, deleteJournalDocument,
 from "../dao/journal.doa.js";
 import User from "../models/user.model.js";
 
-export const getAllJournal = async (req, res) => {
+export const getAllJournal = async (req, res) => { 
     const { userId } = req.params;
     try {
         const journals = await getUserAllJournals(userId);
