@@ -10,6 +10,7 @@ export const getAllJournal = async (req, res) => {
         const journals = await getUserAllJournals(userId);
         res.status(200).json({
             success: true,
+            message:"All Journal Fetched",
             data: journals
         });
     } catch (error) {

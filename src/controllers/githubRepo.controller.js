@@ -35,12 +35,13 @@ export const GithubRepoController = async (req, res) => {
       // Save into DB
       const githubRepo = await createGithubRepoDocument(userId, formatRepo);
 
+
       if (!githubRepo) {
         return res.status(500).json({ message: "Failed to create GitHub repository document" });
       }
 
       githubRepos = githubRepo;
-      await User.findOneAndUpdate({_id:userId},{$set:{repoCount: githubRepos.length}});
+      await User.findOneAndUpdate({_id:userId},{$set:{repoCount: githubRepos.repos.length}});
       return res.status(201).json({ message: "GitHub repositories synced successfully", githubRepos });
 
     }
@@ -103,6 +104,7 @@ export const updateGithubRepoController = async (req, res) => {
 
     // 3. Update the user's repo document
     const updatedRepo = await updateGithubRepoDocument(userId, formatRepo);
+    await User.findOneAndUpdate({_id:userId},{$set:{repoCount: updatedRepo.repos.length}});
 
     if (!updatedRepo) {
       return res.status(404).json({ message: "GitHub repo document not found" });
